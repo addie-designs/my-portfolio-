@@ -1,381 +1,277 @@
-import React, { useState, useEffect } from 'react';
-import { Github, Linkedin, Facebook, Instagram, Code, Palette, Smartphone, Server, Database, Loader, Mail, Phone, MapPin, Menu, X, Sun, Moon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Code, Palette, Smartphone, Server, Database, Layers, Mail, Phone,
+  Github, Linkedin, PenTool, Heart, ArrowRight, ArrowDown, Menu, X,
+} from 'lucide-react';
+import './index.css';
+
+const GITHUB = 'https://github.com/addie-designs';
+const LINKEDIN = 'https://linkedin.com/in/akinjeji-adeola-7481a7343';
+const EMAIL = 'akinjejiadeola@gmail.com';
+
+const NAV = ['home', 'about', 'services', 'skills', 'projects'];
+
+const ABOUT = [
+  [Code, 'Web Development', 'Responsive, scalable web applications built with modern frameworks and best practices.'],
+  [Palette, 'UI/UX Design', 'Beautiful, intuitive interfaces that put user experience and engagement first.'],
+  [Smartphone, 'Mobile Apps', 'Cross-platform mobile apps with native performance and smooth animations.'],
+  [Server, 'Backend Development', 'Robust server-side solutions with efficient APIs and secure databases.'],
+  [Database, 'Database Design', 'Database schemas designed and tuned for performance and scale.'],
+  [Layers, 'Modern Frameworks', 'Hands-on with React, Vue, Angular and other current technologies.'],
+];
+
+const SERVICES = [
+  [Code, 'Custom Web Development', 'Tailored web solutions for your business needs, with clean, maintainable code.'],
+  [Layers, 'E-commerce Solutions', 'Online stores with payment integration, inventory management and analytics.'],
+  [Palette, 'Brand Identity Design', 'Cohesive brand experiences, from logos to complete visual identity systems.'],
+  [Server, 'Consulting & Strategy', 'Technical guidance to help you make informed decisions about your digital presence.'],
+];
+
+const SKILLS = [
+  ['React & Next.js', 95], ['JavaScript & TypeScript', 90], ['UI/UX Design', 85],
+  ['Node.js & Express', 88], ['MongoDB & PostgreSQL', 82], ['Tailwind CSS', 92],
+];
+
+const PROJECTS = [
+  ['E-commerce Platform Redesign', 'A complete UI/UX overhaul for an online retail brand, focused on improving conversion rates.', '#6f8cff', '#2b3fd8'],
+  ['Fintech Mobile App', 'An intuitive and secure mobile banking experience for everyday users.', '#38bdf8', '#2563eb'],
+  ['Analytics Dashboard', 'A data-rich dashboard for a SaaS product, built with React and D3.js.', '#8b7bff', '#3b2fd0'],
+  ['Social Media Platform', 'A modern social networking app with real-time messaging and content sharing.', '#60a5fa', '#4f46e5'],
+  ['Healthcare Management System', 'Patient management with appointment scheduling and records.', '#22d3ee', '#3b5bfd'],
+  ['Real Estate Marketplace', 'Property listings with advanced search, filters and virtual tours.', '#a78bfa', '#4361ee'],
+];
+
+const WORDS = ['UI/UX Design', 'Web Apps', 'Backend', 'Brand Identity', 'Databases', 'Great Experiences'];
+const MARQUEE = [...WORDS, ...WORDS, ...WORDS, ...WORDS];
+
+const delay = (n) => ({ '--d': `${n}s` });
 
 export default function Portfolio() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const root = useRef(null);
+  const stage = useRef(null);
+  const [active, setActive] = useState('home');
+  const [menuOpen, setMenuOpen] = useState(false);
 
+  // Scroll-reveal for every .rv element
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['home', 'about', 'services', 'skills', 'projects', 'contact'];
-      const scrollPosition = window.scrollY + 100;
-
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(section);
-            break;
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
           }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+        }),
+      { threshold: 0.12 }
+    );
+    root.current.querySelectorAll('.rv').forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setMobileMenuOpen(false);
-    }
+  // Highlight the nav link of the section in view
+  useEffect(() => {
+    const spy = () => {
+      let cur = 'home';
+      root.current.querySelectorAll('section').forEach((s) => {
+        if (s.getBoundingClientRect().top < 160) cur = s.id;
+      });
+      setActive(cur);
+    };
+    spy();
+    window.addEventListener('scroll', spy, { passive: true });
+    return () => window.removeEventListener('scroll', spy);
+  }, []);
+
+  // Hero parallax
+  const onMove = (e) => {
+    const el = stage.current;
+    const b = el.getBoundingClientRect();
+    el.style.setProperty('--mx', ((e.clientX - b.left) / b.width - 0.5).toFixed(2));
+    el.style.setProperty('--my', ((e.clientY - b.top) / b.height - 0.5).toFixed(2));
+  };
+  const onLeave = () => {
+    stage.current.style.setProperty('--mx', 0);
+    stage.current.style.setProperty('--my', 0);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Thank you for your message! I will get back to you soon.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    const f = new FormData(e.target);
+    const subject = encodeURIComponent(f.get('s') || 'Portfolio enquiry');
+    const body = encodeURIComponent(`${f.get('m')}\n\n— ${f.get('n')} (${f.get('e')})`);
+    window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
   };
 
-  const NavLink = ({ section, label }) => (
-    <button
-      onClick={() => scrollToSection(section)}
-      className={`px-4 py-2 rounded-lg transition-all duration-300 ${
-        activeSection === section
-          ? 'text-white font-bold bg-purple-600'
-          : darkMode
-          ? 'text-gray-300 hover:text-white'
-          : 'text-gray-700 hover:text-purple-600'
-      }`}
-    >
-      {label}
-    </button>
+  const Socials = () => (
+    <div className="soc">
+      <a href={GITHUB} target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github size="1em" strokeWidth={1.8} /></a>
+      <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin size="1em" strokeWidth={1.8} /></a>
+    </div>
   );
 
   return (
-    <div className={darkMode ? 'dark' : ''}>
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 ${darkMode ? 'bg-gray-900' : 'bg-white'} shadow-lg`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-purple-600'}`}>
-              Portfolio
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-2">
-              <NavLink section="home" label="Home" />
-              <NavLink section="about" label="About" />
-              <NavLink section="services" label="Services" />
-              <NavLink section="skills" label="Skills" />
-              <NavLink section="projects" label="Projects" />
-              <button
-                onClick={() => scrollToSection('contact')}
-                className="ml-4 px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-all duration-300"
-              >
-                Contact
-              </button>
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`ml-2 p-2 rounded-lg ${darkMode ? 'bg-gray-800 text-yellow-400' : 'bg-gray-200 text-gray-700'}`}
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden flex items-center gap-2">
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 rounded-lg ${darkMode ? 'bg-gray-800 text-yellow-400' : 'bg-gray-200 text-gray-700'}`}
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={darkMode ? 'text-white' : 'text-gray-700'}
-              >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-          </div>
+    <div ref={root}>
+      <nav className="nav">
+        <a href="#home" className="logo">Addie<b>.</b></a>
+        <div className={`links ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)}>
+          {NAV.map((id) => (
+            <a key={id} href={`#${id}`} className={`lk ${active === id ? 'on' : ''}`}>
+              {id[0].toUpperCase() + id.slice(1)}
+            </a>
+          ))}
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className={`md:hidden ${darkMode ? 'bg-gray-800' : 'bg-white'} border-t`}>
-            <div className="px-4 py-4 space-y-2">
-              <NavLink section="home" label="Home" />
-              <NavLink section="about" label="About" />
-              <NavLink section="services" label="Services" />
-              <NavLink section="skills" label="Skills" />
-              <NavLink section="projects" label="Projects" />
-              <NavLink section="contact" label="Contact" />
-            </div>
-          </div>
-        )}
+        <div className="rt">
+          <a className="cta d" href="#contact" style={{ padding: '11px 24px' }}>Contact</a>
+          <button className="mb" aria-label="Menu" onClick={() => setMenuOpen((o) => !o)}>
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </nav>
 
-      {/* Hero Section */}
-      <section id="home" className={`min-h-screen pt-20 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-12">
-            <div className="flex-1 text-center md:text-left">
-              <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-black mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                Designer & Developer
-              </h1>
-              <p className={`text-lg sm:text-xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                I'm a passionate designer and developer creating modern, intuitive, and high-performing web applications. My focus is on bridging the gap between aesthetics and functionality to deliver exceptional user experiences.
-              </p>
-              <button
-                onClick={() => scrollToSection('projects')}
-                className="px-8 py-3 bg-purple-600 text-white rounded-full font-bold hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                View My Work
-              </button>
-
-              <div className="flex gap-6 mt-8 justify-center md:justify-start">
-                <a href="https://github.com/addie-designs" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-300 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300 transform hover:scale-110`}>
-                  <Github size={28} />
-                </a>
-                <a href="https://linkedin.com/in/akinjeji-adeola-7481a7343" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-300 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300 transform hover:scale-110`}>
-                  <Linkedin size={28} />
-                </a>
-                {/* <a href="https://facebook.com/yourusername" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-300 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300 transform hover:scale-110`}>
-                  <Facebook size={28} />
-                </a> */}
-                {/* <a href="https://instagram.com/yourusername" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-300 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300 transform hover:scale-110`}>
-                  <Instagram size={28} />
-                </a> */}
-              </div>
-            </div>
-
-            <div className="flex-shrink-0">
-              <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-2xl overflow-hidden shadow-2xl transform rotate-6 hover:rotate-0 transition-all duration-500">
-                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                  <span className="text-white text-6xl font-bold">AD</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className={`min-h-screen py-20 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className={`text-4xl font-bold text-center mb-16 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-            About Me
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { icon: Code, title: 'Web Development', desc: 'Building responsive and scalable web applications using modern frameworks and best practices.' },
-              { icon: Palette, title: 'UI/UX Design', desc: 'Creating beautiful, intuitive interfaces that prioritize user experience and engagement.' },
-              { icon: Smartphone, title: 'Mobile Apps', desc: 'Developing cross-platform mobile applications with native performance and smooth animations.' },
-              { icon: Server, title: 'Backend Development', desc: 'Architecting robust server-side solutions with efficient APIs and secure databases.' },
-              { icon: Database, title: 'Database Design', desc: 'Designing and optimizing database schemas for performance and scalability.' },
-              { icon: Loader, title: 'Modern Frameworks', desc: 'Expertise in React, Vue, Angular, and other cutting-edge technologies.' }
-            ].map((specialty, idx) => (
-              <div key={idx} className={`p-6 rounded-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'} shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2`}>
-                <specialty.icon className="w-12 h-12 text-purple-600 mb-4" strokeWidth={1.5} />
-                <h3 className={`text-xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {specialty.title}
-                </h3>
-                <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                  {specialty.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className={`min-h-screen py-20 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className={`text-4xl font-bold text-center mb-16 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-            My Services
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              { title: 'Custom Web Development', desc: 'Tailored web solutions that meet your specific business needs with clean, maintainable code.' },
-              { title: 'E-commerce Solutions', desc: 'Complete online store development with payment integration, inventory management, and analytics.' },
-              { title: 'Brand Identity Design', desc: 'Creating cohesive brand experiences from logos to complete visual identity systems.' },
-              { title: 'Consulting & Strategy', desc: 'Technical consultation to help you make informed decisions about your digital presence.' }
-            ].map((service, idx) => (
-              <div key={idx} className={`p-8 rounded-2xl ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-2 hover:border-purple-600 transition-all duration-300`}>
-                <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {service.title}
-                </h3>
-                <p className={`text-lg ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {service.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Skills Section */}
-      <section id="skills" className={`min-h-screen py-20 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className={`text-4xl font-bold text-center mb-16 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-            Technical Skills
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              { name: 'React & Next.js', level: 95 },
-              { name: 'JavaScript & TypeScript', level: 90 },
-              { name: 'UI/UX Design', level: 85 },
-              { name: 'Node.js & Express', level: 88 },
-              { name: 'MongoDB & PostgreSQL', level: 82 },
-              { name: 'Tailwind CSS', level: 92 }
-            ].map((skill, idx) => (
-              <div key={idx}>
-                <div className="flex justify-between mb-2">
-                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {skill.name}
-                  </span>
-                  <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                    {skill.level}%
-                  </span>
-                </div>
-                <div className={`h-3 rounded-full ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                  <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full transition-all duration-1000"
-                    style={{ width: `${skill.level}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className={`min-h-screen py-20 ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className={`text-4xl font-bold text-center mb-16 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-            Featured Projects
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { title: 'E-commerce Platform Redesign', desc: 'A complete UI/UX overhaul for an online retail brand, focusing on improving conversion rates.', color: 'from-blue-400 to-blue-600' },
-              { title: 'Fintech Mobile App', desc: 'Designing an intuitive and secure mobile banking experience for everyday users.', color: 'from-green-400 to-green-600' },
-              { title: 'Analytics Dashboard', desc: 'A data-rich dashboard for a SaaS product, built with React and D3.js.', color: 'from-purple-400 to-purple-600' },
-              { title: 'Social Media Platform', desc: 'Building a modern social networking app with real-time messaging and content sharing.', color: 'from-pink-400 to-pink-600' },
-              { title: 'Healthcare Management System', desc: 'Comprehensive patient management system with appointment scheduling and records.', color: 'from-red-400 to-red-600' },
-              { title: 'Real Estate Marketplace', desc: 'Property listing platform with advanced search, filters, and virtual tours.', color: 'from-yellow-400 to-yellow-600' }
-            ].map((project, idx) => (
-              <div key={idx} className={`rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <div className={`h-48 bg-gradient-to-br ${project.color}`} />
-                <div className="p-6">
-                  <h3 className={`text-xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {project.title}
-                  </h3>
-                  <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-                    {project.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className={`min-h-screen py-20 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className={`text-4xl font-bold text-center mb-16 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-            Get In Touch
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <div className={`p-6 rounded-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'} shadow-lg text-center`}>
-              <Mail className="w-12 h-12 text-purple-600 mx-auto mb-4" strokeWidth={1.5} />
-              <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Email</h3>
-              <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>akinjejiadeola@gmail.com</p>
-            </div>
-            
-            <div className={`p-6 rounded-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'} shadow-lg text-center`}>
-              <Phone className="w-12 h-12 text-purple-600 mx-auto mb-4" strokeWidth={1.5} />
-              <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Phone</h3>
-              <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>+234 916 870 5162</p>
-            </div>
-          </div>
-
-          <div className={`p-8 rounded-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'} shadow-lg`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <input
-                type="text"
-                placeholder="Your Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className={`px-4 py-3 rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-50 text-gray-900 border-gray-200'} border-2 focus:border-purple-600 outline-none transition-all duration-300`}
-              />
-              <input
-                type="email"
-                placeholder="Your Email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className={`px-4 py-3 rounded-lg ${darkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-50 text-gray-900 border-gray-200'} border-2 focus:border-purple-600 outline-none transition-all duration-300`}
-              />
-            </div>
-            <input
-              type="text"
-              placeholder="Subject"
-              value={formData.subject}
-              onChange={(e) => setFormData({...formData, subject: e.target.value})}
-              className={`w-full px-4 py-3 rounded-lg mb-6 ${darkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-50 text-gray-900 border-gray-200'} border-2 focus:border-purple-600 outline-none transition-all duration-300`}
-            />
-            <textarea
-              placeholder="Your Message"
-              value={formData.message}
-              onChange={(e) => setFormData({...formData, message: e.target.value})}
-              rows="6"
-              className={`w-full px-4 py-3 rounded-lg mb-6 ${darkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-50 text-gray-900 border-gray-200'} border-2 focus:border-purple-600 outline-none transition-all duration-300`}
-            />
-            <button
-              onClick={handleSubmit}
-              className="w-full py-4 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Send Message
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className={`py-8 ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-t`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className={`mb-4 md:mb-0 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              © 2026 Portfolio. All rights reserved.
+      <section className="hero" id="home">
+        <div className="wrap hgrid">
+          <div>
+            <div className="kick">Great</div>
+            <h1>
+              <span className="row"><span className="tag">Good</span><span className="big">Design</span></span>
+              <span className="acc">Experience</span>
+              <span className="row"><span className="big">Builds</span><span className="tag g">Better</span></span>
+            </h1>
+            <p className="lead">
+              I design intuitive interfaces and build modern, high-performing web apps that solve real problems and create <b>real value</b>.
             </p>
-            <div className="flex gap-6">
-              <a href="https://github.com/addie-designs" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-400 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300`}>
-                <Github size={24} />
-              </a>
-              <a href="www.linkedin.com/in/akinjeji-adeola-7481a7343" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-400 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300`}>
-                <Linkedin size={24} />
-              </a>
-              {/* <a href="https://facebook.com/yourusername" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-400 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300`}>
-                <Facebook size={24} />
-              </a> */}
-              {/* <a href="https://instagram.com/yourusername" target="_blank" rel="noopener noreferrer" className={`${darkMode ? 'text-gray-400 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-all duration-300`}>
-                <Instagram size={24} />
-              </a> */}
-            </div>
+            <a className="cta" href="#projects">View my work <ArrowRight size={20} /></a>
+            <Socials />
           </div>
+
+          <div className="stage" ref={stage} onPointerMove={onMove} onPointerLeave={onLeave}>
+            <svg className="rib" viewBox="0 0 600 650" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="rg" x1="0" x2="1">
+                  <stop offset="0" stopColor="#2447e0" /><stop offset="1" stopColor="#5b6cff" />
+                </linearGradient>
+              </defs>
+              <path pathLength="1" stroke="url(#rg)" d="M-40 330 C110 250 210 420 100 510 C20 570 -70 490 10 420" />
+              <path pathLength="1" stroke="url(#rg)" d="M640 360 C500 300 430 470 540 530 C630 580 700 480 620 430" />
+            </svg>
+            <div className="tile t1"><PenTool size="1em" strokeWidth={1.8} /></div>
+            <div className="tile t2"><Heart size="1em" strokeWidth={1.8} /></div>
+            <div className="tile t3">AD</div>
+            <div className="phone">
+              <div className="screen">
+                <div className="pr">
+                  <div className="av">AD</div>
+                  <div><b>Addie</b><small>UI/UX Designer & Dev</small></div>
+                </div>
+                <h3>Designing Digital Experiences People <em>Love.</em></h3>
+                <a className="vb" href="#projects">View Work</a>
+                <div className="st">
+                  <div><b>6+</b><small>Projects</small></div>
+                  <div><b>2</b><small>Disciplines</small></div>
+                  <div><b>100%</b><small>Passion</small></div>
+                </div>
+                <span className="sw">Selected Work</span>
+                <div className="mc">
+                  <div><s /><s /><s /><s /></div>
+                  <div><s /><s /><s /></div>
+                </div>
+              </div>
+            </div>
+            <a className="sw-pill" href="#about"><ArrowDown size={22} /> Swipe</a>
+          </div>
+        </div>
+      </section>
+
+      <div className="mq" aria-hidden="true">
+        <div>{MARQUEE.map((w, i) => <span key={i}>{w}</span>)}</div>
+      </div>
+
+      <section id="about">
+        <div className="wrap">
+          <h2 className="sh rv">Design that works,<br /><em>code that lasts.</em></h2>
+          <p className="sub rv">Designer and developer bridging aesthetics and functionality, from the first sketch to the deployed server.</p>
+          <div className="g3">
+            {ABOUT.map(([Icon, title, desc], i) => (
+              <div key={title} className="glass card rv" style={delay((i % 3) * 0.1)}>
+                <div className="ico"><Icon size="1em" strokeWidth={1.8} /></div>
+                <h3>{title}</h3><p>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="services">
+        <div className="wrap">
+          <h2 className="sh rv">Work with <em>me.</em></h2>
+          <p className="sub rv">Four ways I can help you ship something people enjoy using.</p>
+          <div className="svc">
+            {SERVICES.map(([Icon, title, desc], i) => (
+              <div key={title} className="glass card rv" style={delay((i % 2) * 0.12)}>
+                <div className="ico"><Icon size="1em" strokeWidth={1.8} /></div>
+                <div><h3>{title}</h3><p>{desc}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="skills">
+        <div className="wrap">
+          <h2 className="sh rv">Technical <em>skills</em></h2>
+          <p className="sub rv">The tools I reach for every day.</p>
+          <div className="bars">
+            {SKILLS.map(([name, level], i) => (
+              <div key={name} className="rv" style={delay((i % 2) * 0.1)}>
+                <div className="bh"><span>{name}</span><span>{level}%</span></div>
+                <div className="bar"><i style={{ '--w': `${level}%` }} /></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" className="dk">
+        <div className="wrap">
+          <h2 className="sh rv">Featured <em>projects</em></h2>
+          <p className="sub rv">A selection of interfaces and systems I have designed and built.</p>
+          <div className="g3">
+            {PROJECTS.map(([title, desc, a, b], i) => (
+              <article key={title} className="glass card pj rv" style={delay((i % 3) * 0.1)}>
+                <div className="th" style={{ '--a': a, '--b': b }}><u /><u /></div>
+                <div className="bd"><h3>{title}</h3><p>{desc}</p></div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="dk">
+        <div className="wrap">
+          <h2 className="sh rv">Let’s build <em>something.</em></h2>
+          <p className="sub rv">Tell me about your idea and I’ll reply soon.</p>
+          <div className="ct">
+            <div className="rv">
+              <div className="glass ci"><div className="ico"><Mail size="1em" strokeWidth={1.8} /></div><div><small>Email</small><b>{EMAIL}</b></div></div>
+              <div className="glass ci"><div className="ico"><Phone size="1em" strokeWidth={1.8} /></div><div><small>Phone</small><b>+234 916 870 5162</b></div></div>
+            </div>
+            <form className="glass fm rv" style={delay(0.15)} onSubmit={handleSubmit}>
+              <div className="fr">
+                <input name="n" placeholder="Your name" required />
+                <input name="e" type="email" placeholder="Your email" required />
+              </div>
+              <input name="s" placeholder="Subject" />
+              <textarea name="m" rows={6} placeholder="Your message" required />
+              <button className="cta" type="submit">Send message <ArrowRight size={20} /></button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <footer className="dk">
+        <div className="wrap">
+          <p>© 2026 Addie. All rights reserved.</p>
+          <Socials />
         </div>
       </footer>
     </div>
