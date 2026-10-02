@@ -112,7 +112,7 @@ export default function Portfolio() {
   return (
     <div ref={root}>
       <nav className="nav">
-        <a href="#home" className="logo">Addie<b>.</b></a>
+        <a href="#home" className="logo">Akinjeji Adeola<b>.</b></a>
         <div className={`links ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)}>
           {NAV.map((id) => (
             <a key={id} href={`#${id}`} className={`lk ${active === id ? 'on' : ''}`}>
@@ -160,8 +160,8 @@ export default function Portfolio() {
             <div className="phone">
               <div className="screen">
                 <div className="pr">
-                  <div className="av">AD</div>
-                  <div><b>Addie</b><small>UI/UX Designer & Dev</small></div>
+                  <div className="av">AA</div>
+                  <div><b>Akinjeji Adeola</b><small>Fullstack Developer</small></div>
                 </div>
                 <h3>Designing Digital Experiences People <em>Love.</em></h3>
                 <a className="vb" href="#projects">View Work</a>
