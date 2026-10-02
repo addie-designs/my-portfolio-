@@ -67,7 +67,7 @@ h1{font-weight:800;letter-spacing:-.055em;line-height:.9;margin:6px 0 26px}
 .sw-pill{position:absolute;z-index:4;bottom:20px;right:8%;display:flex;align-items:center;gap:12px;padding:14px 28px;border-radius:999px;background:linear-gradient(135deg,#3b3fe0,#5b5ff0);color:#fff;font-weight:700;box-shadow:0 20px 40px -12px rgba(36,50,220,.8),inset 0 1px 0 rgba(255,255,255,.4);animation:pulse 2.4s ease-in-out infinite}
 
 /* marquee */
-.mq{overflow:hidden;white-space:nowrap;padding:22px 0;background:var(--glass);border-block:2px solid var(--gb);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transform:rotate(-1.2deg);margin:0 -0px}
+.mq{overflow:hidden;white-space:nowrap;padding:22px 0;background:var(--glass);border-block:1px solid var(--gb);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transform:rotate(-1.2deg);margin:0 -0px}
 .mq div{display:inline-flex;gap:38px;animation:mq 28s linear infinite;font-size:clamp(1.6rem,3.4vw,2.6rem);font-weight:800;letter-spacing:-.04em}
 .mq span:nth-child(even){color:var(--acc)}
 
